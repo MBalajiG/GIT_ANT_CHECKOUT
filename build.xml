@@ -29,7 +29,7 @@
 <!--ANTCONTRIB TASKS-->
 
 	<target name="fortarget">
-		<for list="clean,init,compile,war,stop,undeploy,deploy,start" param="target">
+		<for list="clean,init,compile,war" param="target">
 			<sequential>
 				<antcall target="@{target}"/>
 			</sequential>
