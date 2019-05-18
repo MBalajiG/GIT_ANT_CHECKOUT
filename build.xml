@@ -1,0 +1,102 @@
+<?xml version="1.0" ?> 
+<project name="AntExample1" default="fortarget">
+
+<!-- ANT INTEGRATION WITH TOMCAT FOR AUTOMATIC DEPLOYMENT -->
+
+<path id="tomant_class">
+	<fileset dir="C:\apache-tomcat-8.5.40\bin">
+		<include name= "*jar"/>
+	</fileset>
+	<fileset dir="C:\apache-tomcat-8.5.40\lib">
+		<include name= "*jar"/>
+	</fileset>
+</path>
+
+<!--NEED TO DEFINE TASKDEFINITION TO TELL ANT INCLUDE TOMCAT TASKS-->
+
+<taskdef name="stop" classname="org.apache.catalina.ant.StopTask" classpathref="tomant_class"/>
+<taskdef name="start" classname="org.apache.catalina.ant.StartTask" classpathref="tomant_class"/>
+<taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask" classpathref="tomant_class"/>
+<taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask" classpathref="tomant_class"/>
+
+<property file="tomcat.properties"/> <!--PROPERTY FILE-->
+
+<!--ANTCONTRIB TASKDEF-->
+
+<taskdef resource="net/sf/antcontrib/antlib.xml"/>
+<!--<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>-->
+
+<!--ANTCONTRIB TASKS-->
+
+	<target name="fortarget">
+		<for list="clean,init,compile,war,stop,undeploy,deploy,start" param="target">
+			<sequential>
+				<antcall target="@{target}"/>
+			</sequential>
+		</for>
+	</target>
+
+<!--NORMAL ANT TASKS-->
+
+	<path id="compile.classpath">
+		<fileset dir="WebContent/WEB-INF/lib">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="dist" />
+		<delete dir="build" />
+	</target>
+	
+	<target name="init">
+		<mkdir dir="build/classes"/>
+		<mkdir dir="dist" />
+	</target>
+	
+	<target name="compile">
+		<javac destdir="build/classes" debug="true" srcdir="src">
+			<classpath refid="compile.classpath"/>
+		</javac>
+	</target>
+	
+	<target name="war">
+		<war destfile="dist/AntExample.war" webxml="WebContent/WEB-INF/web.xml">
+			<fileset dir="WebContent"/>
+			<lib dir="WebContent/WEB-INF/lib"/>
+			<classes dir="build/classes"/>
+		</war>
+	</target>
+	
+<!--ANT SPECIAL TASKS-->
+
+<target name="stop">
+	<stop 	url="${tomcat_url}"
+			username="${tomcat_username}"
+			password="${tomcat_password}"
+			path="${warfile}"/>
+</target>
+
+<target name="undeploy">
+	<undeploy 	url="${tomcat_url}"
+				username="${tomcat_username}"
+				password="${tomcat_password}"
+				path="${warfile}"/>
+</target>
+
+<target name="deploy">
+	<deploy 	url="${tomcat_url}"
+				username="${tomcat_username}"
+				password="${tomcat_password}"
+				path="${warfile}"
+				war="file:${newwar}"/>
+</target>
+
+<target name="start">
+	<start 	url="${tomcat_url}"
+			username="${tomcat_username}"
+			password="${tomcat_password}"
+			path="${warfile}"/>
+</target>
+
+</project>
